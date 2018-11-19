@@ -32,6 +32,7 @@ module.exports = function(grunt) {
       if (dest.indexOf('.po') > -1) {
         dest = dest.replace('.po', '.mo');
       }
+      grunt.file.write(dest);
 
       // Default arguments
       const args = ['--output', dest, src];
