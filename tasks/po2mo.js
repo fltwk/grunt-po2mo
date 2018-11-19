@@ -8,7 +8,7 @@
 
 'use strict';
 
-const { spawnSync } = require('child_process');
+const { spawn } = require('child_process');
 
 module.exports = function(grunt) {
   grunt.registerMultiTask('po2mo', 'Compiles .po files into binary .mo files with msgfmt.', function() {
@@ -47,20 +47,24 @@ module.exports = function(grunt) {
       if (options.noHash) args.unshift('--no-hash');
       if (options.useFuzzy) args.unshift('--use-fuzzy');
 
-      grunt.file.write(dest);
       grunt.verbose.writeln('Executing:', 'msgfmt', args.join(' ').trim());
+      const child = spawn('msgfmt', args);
 
-      const result = spawnSync('msgfmt', args);
+      child.stdout.on('data', (line) => {
+        grunt.verbose.writeln(line);
+      });
 
-      grunt.verbose.writeln('Executed with status:', result.status);
+      child.stderr.on('data', (line) => {
+        grunt.log.error(line);
+      });
 
-      if (result.status !== 0) {
-        grunt.log.error(result.stderr);
-      }
+      child.on('close', function(status) {
+        grunt.verbose.writeln('Executed with status:', status);
 
-      if (options.deleteSrc) {
-        grunt.file.delete(src);
-      }
+        if (status === 0 && options.deleteSrc) {
+          grunt.file.delete(src);
+        }
+      });
     });
   });
 };
