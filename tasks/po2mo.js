@@ -32,7 +32,6 @@ module.exports = function(grunt) {
       if (dest.indexOf('.po') > -1) {
         dest = dest.replace('.po', '.mo');
       }
-      grunt.file.write(dest);
 
       // Default arguments
       const args = ['--output', dest, src];
@@ -49,17 +48,17 @@ module.exports = function(grunt) {
       if (options.useFuzzy) args.unshift('--use-fuzzy');
 
       grunt.verbose.writeln('Executing:', 'msgfmt', args.join(' ').trim());
-      const child = spawn('msgfmt', args);
+      const cp = spawn('msgfmt', args);
 
-      child.stdout.on('data', (line) => {
+      cp.stdout.on('data', function(line) {
         grunt.verbose.writeln(line);
       });
 
-      child.stderr.on('data', (line) => {
+      cp.stderr.on('data', function(line) {
         grunt.log.error(line);
       });
 
-      child.on('close', function(status) {
+      cp.on('close', function(status) {
         grunt.verbose.writeln('Executed with status:', status);
 
         if (status === 0 && options.deleteSrc) {
